@@ -8,6 +8,9 @@ interface ProductGalleryProps {
   productId: string;
   mainImageUrl: string | null;
   productName: string;
+  productDescription?: string | null;
+  productPrice?: number | null;
+  productCategory?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
