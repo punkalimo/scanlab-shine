@@ -2,8 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Truck, Music, Shield, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useBrands, useContentPage } from "@/hooks/useCmsData";
 import Layout from "@/components/Layout";
 import FacebookPosts from "@/components/FacebookPosts";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -59,29 +58,10 @@ const defaultFeatures = [
 const featureIcons = [Shield, Truck, Star];
 
 export default function Index() {
-  // Fetch dynamic brands
-  const { data: dbBrands = [] } = useQuery({
-    queryKey: ["public-brands"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("brands")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Fetch dynamic content
-  const { data: contentPages = [] } = useQuery({
-    queryKey: ["public-content-pages"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("content_pages").select("*");
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: dbBrands = [] } = useBrands();
+  const { data: heroContent = {} } = useContentPage("homepage_hero");
+  const { data: featuresContent = {} } = useContentPage("features");
+  const { data: ctaContent = {} } = useContentPage("cta");
 
   const truckBrands = dbBrands
     .filter((b) => b.brand_type === "truck")
@@ -89,14 +69,6 @@ export default function Index() {
   const audioBrands = dbBrands
     .filter((b) => b.brand_type === "audio")
     .map((b) => ({ name: b.name, logo: b.logo_url || staticLogos[b.name] || "" }));
-
-  // Content from CMS
-  const heroPage = contentPages.find((p) => p.page_key === "homepage_hero");
-  const heroContent = (heroPage?.content as Record<string, string>) || {};
-  const featuresPage = contentPages.find((p) => p.page_key === "features");
-  const featuresContent = (featuresPage?.content as Record<string, string>) || {};
-  const ctaPage = contentPages.find((p) => p.page_key === "cta");
-  const ctaContent = (ctaPage?.content as Record<string, string>) || {};
 
   const features = defaultFeatures.map((f, i) => ({
     ...f,

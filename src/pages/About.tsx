@@ -1,35 +1,23 @@
 import { motion } from "framer-motion";
-import { MapPin, Truck, Music, Shield, Users, Headphones, Settings, Wrench } from "lucide-react";
+import { MapPin, Truck, Music, Shield, Users, Headphones } from "lucide-react";
 import Layout from "@/components/Layout";
-
-const truckBrands = [
-  { name: "International", icon: Truck },
-  { name: "Freightliner", icon: Truck },
-  { name: "Volvo", icon: Truck },
-  { name: "Scania", icon: Truck },
-  { name: "Howo", icon: Truck },
-  { name: "MAN", icon: Truck },
-  { name: "DAF", icon: Truck },
-  { name: "Isuzu", icon: Truck },
-  { name: "Mitsubishi", icon: Settings },
-  { name: "Toyota", icon: Wrench },
-];
-
-const audioBrands = [
-  { name: "Pioneer", icon: Headphones },
-  { name: "JBL", icon: Music },
-  { name: "Kenwood", icon: Headphones },
-  { name: "Sony", icon: Music },
-  { name: "Alpine", icon: Headphones },
-  { name: "Blaupunkt", icon: Music },
-];
+import { useContentPage, useBrands, useSiteSettings } from "@/hooks/useCmsData";
 
 export default function About() {
+  const { data: aboutContent = {} } = useContentPage("about");
+  const { data: brands = [] } = useBrands();
+  const { data: settings = {} } = useSiteSettings();
+
+  const truckBrands = brands.filter((b) => b.brand_type === "truck");
+  const audioBrands = brands.filter((b) => b.brand_type === "audio");
+
   return (
     <Layout>
       <section className="bg-nav text-nav-foreground py-16">
         <div className="container">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold">About ScanLab Motor Spares</h1>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold">
+            About {settings.business_name || "ScanLab Motor Spares"}
+          </h1>
           <p className="mt-2 text-muted-foreground">Proudly Zambian. Passionately driven.</p>
         </div>
       </section>
@@ -41,16 +29,16 @@ export default function About() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl font-heading font-bold mb-4">Our Story</h2>
+            <h2 className="text-2xl font-heading font-bold mb-4">
+              {aboutContent.story_title || "Our Story"}
+            </h2>
             <p className="text-muted-foreground leading-relaxed">
-              ScanLab Motor Spares is a proudly Zambian-owned company specializing in truck and trailer spare parts 
-              as well as premium car audio and accessories. Located on Kalambo Road in Lusaka's Light Industrial Area, 
-              we serve the transport industry with genuine, high-quality products sourced from trusted manufacturers worldwide.
+              {aboutContent.story_p1 ||
+                "ScanLab Motor Spares is a proudly Zambian-owned company specializing in truck and trailer spare parts as well as premium car audio and accessories. Located on Kalambo Road in Lusaka's Light Industrial Area, we serve the transport industry with genuine, high-quality products sourced from trusted manufacturers worldwide."}
             </p>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Our mission is to provide our customers with reliable, competitively priced motor spares and audio solutions, 
-              backed by expert advice and exceptional service. We believe in building long-term relationships based on trust, 
-              quality, and value.
+              {aboutContent.story_p2 ||
+                "Our mission is to provide our customers with reliable, competitively priced motor spares and audio solutions, backed by expert advice and exceptional service. We believe in building long-term relationships based on trust, quality, and value."}
             </p>
           </motion.div>
 
@@ -80,12 +68,16 @@ export default function About() {
       <section className="bg-muted py-16">
         <div className="container text-center">
           <h2 className="text-2xl font-heading font-bold mb-8">Brands We Serve</h2>
-          
+
           <h3 className="text-lg font-heading font-semibold mb-4 text-muted-foreground">Truck & Trailer</h3>
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {truckBrands.map((brand) => (
-              <span key={brand.name} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
-                <brand.icon className="h-4 w-4 text-primary" />
+              <span key={brand.id} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
+                {brand.logo_url ? (
+                  <img src={brand.logo_url} alt={brand.name} className="h-5 w-5 object-contain" />
+                ) : (
+                  <Truck className="h-4 w-4 text-primary" />
+                )}
                 {brand.name}
               </span>
             ))}
@@ -94,8 +86,12 @@ export default function About() {
           <h3 className="text-lg font-heading font-semibold mb-4 text-muted-foreground">Audio & Accessories</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {audioBrands.map((brand) => (
-              <span key={brand.name} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
-                <brand.icon className="h-4 w-4 text-accent" />
+              <span key={brand.id} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
+                {brand.logo_url ? (
+                  <img src={brand.logo_url} alt={brand.name} className="h-5 w-5 object-contain" />
+                ) : (
+                  <Headphones className="h-4 w-4 text-accent" />
+                )}
                 {brand.name}
               </span>
             ))}
@@ -109,7 +105,9 @@ export default function About() {
           <h2 className="text-2xl font-heading font-bold flex items-center justify-center gap-2">
             <MapPin className="h-6 w-6 text-primary" /> Find Us
           </h2>
-          <p className="text-muted-foreground mt-2">1563 Kalambo Road, Light Industrial Area, Lusaka, Zambia</p>
+          <p className="text-muted-foreground mt-2">
+            {settings.address || "1563 Kalambo Road, Light Industrial Area, Lusaka, Zambia"}
+          </p>
         </div>
         <div className="rounded-xl overflow-hidden shadow-lg">
           <iframe
