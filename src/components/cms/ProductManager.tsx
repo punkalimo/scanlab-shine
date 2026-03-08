@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download, FileUp, FolderEdit } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download, FileUp, FolderEdit, Sparkles, Loader2 } from "lucide-react";
 import { Dialog as BulkDialog, DialogContent as BulkDialogContent, DialogHeader as BulkDialogHeader, DialogTitle as BulkDialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
