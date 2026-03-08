@@ -312,13 +312,13 @@ export default function Index() {
           viewport={{ once: true }}
           className="rounded-2xl bg-primary p-12 text-primary-foreground"
         >
-          <h2 className="text-3xl md:text-4xl font-heading font-bold">Need Motor Spares?</h2>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold">{ctaContent.heading || "Need Motor Spares?"}</h2>
           <p className="mt-3 text-primary-foreground/80 max-w-md mx-auto">
-            Get in touch with us today for competitive prices and expert advice on all your motor spares needs.
+            {ctaContent.subtext || "Get in touch with us today for competitive prices and expert advice on all your motor spares needs."}
           </p>
           <Link to="/contact">
             <Button size="lg" variant="secondary" className="mt-6 gap-2">
-              Contact Us <ArrowRight className="h-4 w-4" />
+              {ctaContent.button_text || "Contact Us"} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </motion.div>
