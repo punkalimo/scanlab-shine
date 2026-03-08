@@ -612,6 +612,33 @@ export default function ProductManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Bulk Category Change Dialog */}
+      <BulkDialog open={bulkCategoryOpen} onOpenChange={setBulkCategoryOpen}>
+        <BulkDialogContent className="max-w-sm">
+          <BulkDialogHeader>
+            <BulkDialogTitle className="font-heading">Change Category</BulkDialogTitle>
+          </BulkDialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">Set a new category for {selectedIds.size} selected product(s).</p>
+            <Input
+              placeholder="New category name"
+              value={bulkCategory}
+              onChange={(e) => setBulkCategory(e.target.value)}
+            />
+            <div className="flex gap-3">
+              <Button
+                className="flex-1"
+                disabled={!bulkCategory.trim() || bulkCategoryMutation.isPending}
+                onClick={() => bulkCategoryMutation.mutate({ ids: Array.from(selectedIds), category: bulkCategory.trim() })}
+              >
+                {bulkCategoryMutation.isPending ? "Updating..." : "Apply"}
+              </Button>
+              <Button variant="outline" onClick={() => setBulkCategoryOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        </BulkDialogContent>
+      </BulkDialog>
     </div>
   );
 }
