@@ -77,10 +77,7 @@ export default function Audio() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            <p className="text-lg">No products found.</p>
-            <p className="text-sm mt-1">Check back soon — we're adding new inventory regularly!</p>
-          </div>
+          <NoResultsInquiry search={search} productType="audio & accessories" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filtered.map((product) => (
