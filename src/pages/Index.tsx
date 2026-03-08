@@ -56,7 +56,54 @@ const defaultFeatures = [
   },
 ];
 
+const featureIcons = [Shield, Truck, Star];
+
 export default function Index() {
+  // Fetch dynamic brands
+  const { data: dbBrands = [] } = useQuery({
+    queryKey: ["public-brands"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("brands")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch dynamic content
+  const { data: contentPages = [] } = useQuery({
+    queryKey: ["public-content-pages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("content_pages").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const truckBrands = dbBrands
+    .filter((b) => b.brand_type === "truck")
+    .map((b) => ({ name: b.name, logo: b.logo_url || staticLogos[b.name] || "" }));
+  const audioBrands = dbBrands
+    .filter((b) => b.brand_type === "audio")
+    .map((b) => ({ name: b.name, logo: b.logo_url || staticLogos[b.name] || "" }));
+
+  // Content from CMS
+  const heroPage = contentPages.find((p) => p.page_key === "homepage_hero");
+  const heroContent = (heroPage?.content as Record<string, string>) || {};
+  const featuresPage = contentPages.find((p) => p.page_key === "features");
+  const featuresContent = (featuresPage?.content as Record<string, string>) || {};
+  const ctaPage = contentPages.find((p) => p.page_key === "cta");
+  const ctaContent = (ctaPage?.content as Record<string, string>) || {};
+
+  const features = defaultFeatures.map((f, i) => ({
+    ...f,
+    icon: featureIcons[i],
+    title: featuresContent[`f${i + 1}_title`] || f.title,
+    description: featuresContent[`f${i + 1}_desc`] || f.description,
+  }));
   return (
     <Layout>
       {/* Hero with background image */}
