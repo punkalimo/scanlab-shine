@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone, Mail, MapPin, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Send, Facebook, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -111,7 +111,7 @@ export default function Contact() {
                 <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">Phone</h3>
-                  <p className="text-sm text-muted-foreground">+260 977 123 456</p>
+                  <p className="text-sm text-muted-foreground">+260 977 760 291</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 rounded-lg border p-4">
@@ -119,6 +119,20 @@ export default function Contact() {
                 <div>
                   <h3 className="font-semibold text-sm">Email</h3>
                   <p className="text-sm text-muted-foreground">info@scanlabmotors.com</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 rounded-lg border p-4">
+                <MessageCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-sm">WhatsApp</h3>
+                  <a href="https://wa.me/+260977760291" className="text-sm text-primary hover:underline">Chat with us on WhatsApp</a>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 rounded-lg border p-4">
+                <Facebook className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-sm">Facebook</h3>
+                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Follow us on Facebook</a>
                 </div>
               </div>
             </div>
