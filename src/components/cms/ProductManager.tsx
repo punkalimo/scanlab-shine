@@ -383,8 +383,43 @@ export default function ProductManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} maxLength={1000} />
+                <div className="flex items-center justify-between">
+                  <Label>Description</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 h-7 text-xs"
+                    disabled={aiGenerating || !form.name}
+                    onClick={async () => {
+                      setAiGenerating(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke("generate-description", {
+                          body: {
+                            name: form.name,
+                            category: form.category,
+                            product_type: form.product_type,
+                            image_url: mainImagePreview && !form.mainImage ? mainImagePreview : undefined,
+                          },
+                        });
+                        if (error) throw error;
+                        if (data?.error) throw new Error(data.error);
+                        if (data?.description) {
+                          setForm((prev) => ({ ...prev, description: data.description }));
+                          toast({ title: "Description generated" });
+                        }
+                      } catch (err: any) {
+                        toast({ title: "AI generation failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setAiGenerating(false);
+                      }
+                    }}
+                  >
+                    {aiGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                    {aiGenerating ? "Generating..." : "AI Suggest"}
+                  </Button>
+                </div>
+                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} maxLength={1000} placeholder="Enter description or use AI Suggest" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
