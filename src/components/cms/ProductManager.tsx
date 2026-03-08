@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -250,6 +250,31 @@ export default function ProductManager() {
     }
   };
 
+  const exportCsv = () => {
+    const data = filtered ?? [];
+    if (!data.length) return toast({ title: "Nothing to export" });
+    const headers = ["Name", "Description", "Category", "Type", "Price", "Image URL", "Created At"];
+    const escape = (v: string) => `"${(v ?? "").replace(/"/g, '""')}"`;
+    const rows = data.map((p) => [
+      escape(p.name),
+      escape(p.description ?? ""),
+      escape(p.category),
+      escape(p.product_type),
+      p.price ?? "",
+      escape(p.image_url ?? ""),
+      p.created_at,
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "CSV exported" });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -257,12 +282,16 @@ export default function ProductManager() {
           <h2 className="text-2xl font-heading font-bold text-foreground">Products</h2>
           <p className="text-muted-foreground text-sm">Manage your product catalog</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" /> Add Product
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={exportCsv}>
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" /> Add Product
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-heading">{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
@@ -375,6 +404,7 @@ export default function ProductManager() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters & Bulk Actions */}
