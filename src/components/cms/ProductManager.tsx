@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Upload, X, Search, Package } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -22,7 +23,8 @@ interface ProductForm {
   category: string;
   product_type: "spares" | "audio";
   price: string;
-  image: File | null;
+  mainImage: File | null;
+  galleryImages: File[];
 }
 
 const emptyForm: ProductForm = {
@@ -31,17 +33,22 @@ const emptyForm: ProductForm = {
   category: "",
   product_type: "spares",
   price: "",
-  image: null,
+  mainImage: null,
+  galleryImages: [],
 };
 
 export default function ProductManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [existingGallery, setExistingGallery] = useState<{ id: string; image_url: string }[]>([]);
+  const [removedGalleryIds, setRemovedGalleryIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [uploading, setUploading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
@@ -66,28 +73,49 @@ export default function ProductManager() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: async (form: ProductForm) => {
+    mutationFn: async (formData: ProductForm) => {
       setUploading(true);
       let imageUrl = editingProduct?.image_url ?? null;
 
-      if (form.image) {
-        imageUrl = await uploadImage(form.image);
+      if (formData.mainImage) {
+        imageUrl = await uploadImage(formData.mainImage);
       }
 
       const payload = {
-        name: form.name.trim(),
-        description: form.description.trim() || null,
-        category: form.category.trim(),
-        product_type: form.product_type,
-        price: form.price ? parseFloat(form.price) : null,
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+        category: formData.category.trim(),
+        product_type: formData.product_type,
+        price: formData.price ? parseFloat(formData.price) : null,
         image_url: imageUrl,
       };
+
+      let productId = editingProduct?.id;
 
       if (editingProduct) {
         const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("products").insert(payload);
+        const { data, error } = await supabase.from("products").insert(payload).select("id").single();
+        if (error) throw error;
+        productId = data.id;
+      }
+
+      // Remove deleted gallery images
+      if (removedGalleryIds.length > 0) {
+        await supabase.from("product_images").delete().in("id", removedGalleryIds);
+      }
+
+      // Upload new gallery images
+      if (formData.galleryImages.length > 0) {
+        const currentMax = existingGallery.length;
+        const galleryInserts = await Promise.all(
+          formData.galleryImages.map(async (file, idx) => {
+            const url = await uploadImage(file);
+            return { product_id: productId!, image_url: url, sort_order: currentMax + idx };
+          })
+        );
+        const { error } = await supabase.from("product_images").insert(galleryInserts);
         if (error) throw error;
       }
     },
@@ -121,14 +149,35 @@ export default function ProductManager() {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("products").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cms-products"] });
+      queryClient.invalidateQueries({ queryKey: ["cms-products-count"] });
+      queryClient.invalidateQueries({ queryKey: ["cms-spares-count"] });
+      queryClient.invalidateQueries({ queryKey: ["cms-audio-count"] });
+      setSelectedIds(new Set());
+      toast({ title: "Products deleted" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
   const resetForm = () => {
     setForm(emptyForm);
     setEditingProduct(null);
-    setImagePreview(null);
+    setMainImagePreview(null);
+    setGalleryPreviews([]);
+    setExistingGallery([]);
+    setRemovedGalleryIds([]);
     setDialogOpen(false);
   };
 
-  const openEdit = (product: Product) => {
+  const openEdit = async (product: Product) => {
     setEditingProduct(product);
     setForm({
       name: product.name,
@@ -136,18 +185,47 @@ export default function ProductManager() {
       category: product.category,
       product_type: product.product_type,
       price: product.price?.toString() ?? "",
-      image: null,
+      mainImage: null,
+      galleryImages: [],
     });
-    setImagePreview(product.image_url);
+    setMainImagePreview(product.image_url);
+    setRemovedGalleryIds([]);
+    setGalleryPreviews([]);
+
+    // Load existing gallery images
+    const { data } = await supabase
+      .from("product_images")
+      .select("id, image_url")
+      .eq("product_id", product.id)
+      .order("sort_order");
+    setExistingGallery(data ?? []);
     setDialogOpen(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setForm({ ...form, image: file });
-      setImagePreview(URL.createObjectURL(file));
+      setForm({ ...form, mainImage: file });
+      setMainImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleGalleryAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) {
+      setForm({ ...form, galleryImages: [...form.galleryImages, ...files] });
+      setGalleryPreviews([...galleryPreviews, ...files.map((f) => URL.createObjectURL(f))]);
+    }
+  };
+
+  const removeNewGallery = (idx: number) => {
+    setForm({ ...form, galleryImages: form.galleryImages.filter((_, i) => i !== idx) });
+    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== idx));
+  };
+
+  const removeExistingGallery = (id: string) => {
+    setRemovedGalleryIds([...removedGalleryIds, id]);
+    setExistingGallery(existingGallery.filter((img) => img.id !== id));
   };
 
   const filtered = products?.filter((p) => {
@@ -156,6 +234,21 @@ export default function ProductManager() {
     const matchesType = filterType === "all" || p.product_type === filterType;
     return matchesSearch && matchesType;
   });
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (!filtered) return;
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((p) => p.id)));
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -213,14 +306,15 @@ export default function ProductManager() {
                 <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </div>
 
+              {/* Main Image */}
               <div className="space-y-2">
-                <Label>Product Image</Label>
-                {imagePreview && (
+                <Label>Main Image</Label>
+                {mainImagePreview && (
                   <div className="relative w-full h-40 rounded-lg overflow-hidden border border-border bg-muted">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                    <img src={mainImagePreview} alt="Preview" className="w-full h-full object-contain" />
                     <button
                       type="button"
-                      onClick={() => { setImagePreview(null); setForm({ ...form, image: null }); }}
+                      onClick={() => { setMainImagePreview(null); setForm({ ...form, mainImage: null }); }}
                       className="absolute top-2 right-2 w-6 h-6 rounded-full bg-foreground/80 text-background flex items-center justify-center"
                     >
                       <X className="w-3 h-3" />
@@ -229,8 +323,46 @@ export default function ProductManager() {
                 )}
                 <label className="flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                   <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Click to upload image</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                  <span className="text-sm text-muted-foreground">Click to upload main image</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleMainImageChange} />
+                </label>
+              </div>
+
+              {/* Gallery Images */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <ImagePlus className="w-4 h-4" /> Gallery Images
+                </Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {existingGallery.map((img) => (
+                    <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted">
+                      <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingGallery(img.id)}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {galleryPreviews.map((src, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted">
+                      <img src={src} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeNewGallery(idx)}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                  <ImagePlus className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Add gallery images</span>
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryAdd} />
                 </label>
               </div>
 
@@ -245,8 +377,8 @@ export default function ProductManager() {
         </Dialog>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Filters & Bulk Actions */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -264,6 +396,22 @@ export default function ProductManager() {
             <SelectItem value="audio">Audio</SelectItem>
           </SelectContent>
         </Select>
+        {selectedIds.size > 0 && (
+          <Button
+            variant="destructive"
+            size="sm"
+            className="gap-2"
+            disabled={bulkDeleteMutation.isPending}
+            onClick={() => {
+              if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
+                bulkDeleteMutation.mutate(Array.from(selectedIds));
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete {selectedIds.size} selected
+          </Button>
+        )}
       </div>
 
       {/* Product Table */}
@@ -282,6 +430,12 @@ export default function ProductManager() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Category</TableHead>
@@ -292,7 +446,13 @@ export default function ProductManager() {
               </TableHeader>
               <TableBody>
                 {filtered.map((product) => (
-                  <TableRow key={product.id}>
+                  <TableRow key={product.id} data-state={selectedIds.has(product.id) ? "selected" : undefined}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(product.id)}
+                        onCheckedChange={() => toggleSelect(product.id)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden border border-border">
                         {product.image_url ? (
