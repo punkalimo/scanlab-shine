@@ -13,6 +13,8 @@ import { toast } from "@/hooks/use-toast";
 export default function ContentEditor() {
   const [heroContent, setHeroContent] = useState<Record<string, string>>({});
   const [aboutContent, setAboutContent] = useState<Record<string, string>>({});
+  const [featuresContent, setFeaturesContent] = useState<Record<string, string>>({});
+  const [ctaContent, setCtaContent] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const queryClient = useQueryClient();
 
