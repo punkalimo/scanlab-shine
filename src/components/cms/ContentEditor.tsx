@@ -31,8 +31,12 @@ export default function ContentEditor() {
     if (pages) {
       const hero = pages.find((p: any) => p.page_key === "homepage_hero");
       const about = pages.find((p: any) => p.page_key === "about");
+      const features = pages.find((p: any) => p.page_key === "features");
+      const cta = pages.find((p: any) => p.page_key === "cta");
       if (hero) setHeroContent(hero.content as any);
       if (about) setAboutContent(about.content as any);
+      if (features) setFeaturesContent(features.content as any);
+      if (cta) setCtaContent(cta.content as any);
       setHasChanges(false);
     }
   }, [pages]);
