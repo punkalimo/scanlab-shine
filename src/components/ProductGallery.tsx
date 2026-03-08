@@ -8,11 +8,23 @@ interface ProductGalleryProps {
   productId: string;
   mainImageUrl: string | null;
   productName: string;
+  productDescription?: string | null;
+  productPrice?: number | null;
+  productCategory?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function ProductGallery({ productId, mainImageUrl, productName, open, onOpenChange }: ProductGalleryProps) {
+export default function ProductGallery({ 
+  productId, 
+  mainImageUrl, 
+  productName, 
+  productDescription,
+  productPrice,
+  productCategory,
+  open, 
+  onOpenChange 
+}: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const { data: galleryImages = [] } = useQuery({
@@ -93,9 +105,18 @@ export default function ProductGallery({ productId, mainImageUrl, productName, o
           </div>
         )}
 
-        {/* Product name */}
-        <div className="px-4 pb-4">
-          <p className="font-heading font-semibold text-foreground">{productName}</p>
+        {/* Product info */}
+        <div className="px-4 pb-4 space-y-2">
+          {productCategory && (
+            <span className="text-xs font-medium uppercase tracking-wider text-primary">{productCategory}</span>
+          )}
+          <p className="font-heading font-semibold text-lg text-foreground">{productName}</p>
+          {productPrice && (
+            <p className="font-heading font-bold text-primary text-xl">K{productPrice.toLocaleString()}</p>
+          )}
+          {productDescription && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{productDescription}</p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -19,7 +19,7 @@ export default function Spares() {
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [category, setCategory] = useState("All");
-  const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null } | null>(null);
+  const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null; description: string | null; price: number | null; category: string } | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
   const { data: products = [], isLoading } = useQuery({
@@ -85,7 +85,7 @@ export default function Spares() {
               <Card
                 key={product.id}
                 className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer relative"
-                onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url })}
+                onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url, description: product.description, price: product.price, category: product.category })}
               >
                 {/* Compare checkbox */}
                 <div
@@ -128,6 +128,9 @@ export default function Spares() {
           productId={galleryProduct.id}
           mainImageUrl={galleryProduct.image_url}
           productName={galleryProduct.name}
+          productDescription={galleryProduct.description}
+          productPrice={galleryProduct.price}
+          productCategory={galleryProduct.category}
           open={!!galleryProduct}
           onOpenChange={(open) => !open && setGalleryProduct(null)}
         />
