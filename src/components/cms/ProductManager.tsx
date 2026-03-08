@@ -500,20 +500,31 @@ export default function ProductManager() {
           </SelectContent>
         </Select>
         {selectedIds.size > 0 && (
-          <Button
-            variant="destructive"
-            size="sm"
-            className="gap-2"
-            disabled={bulkDeleteMutation.isPending}
-            onClick={() => {
-              if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
-                bulkDeleteMutation.mutate(Array.from(selectedIds));
-              }
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete {selectedIds.size} selected
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setBulkCategoryOpen(true)}
+            >
+              <FolderEdit className="w-4 h-4" />
+              Change Category ({selectedIds.size})
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-2"
+              disabled={bulkDeleteMutation.isPending}
+              onClick={() => {
+                if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
+                  bulkDeleteMutation.mutate(Array.from(selectedIds));
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete {selectedIds.size}
+            </Button>
+          </>
         )}
       </div>
 
