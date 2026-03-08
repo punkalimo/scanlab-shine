@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download, FileUp, FolderEdit } from "lucide-react";
+import { Dialog as BulkDialog, DialogContent as BulkDialogContent, DialogHeader as BulkDialogHeader, DialogTitle as BulkDialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -49,6 +50,9 @@ export default function ProductManager() {
   const [filterType, setFilterType] = useState<string>("all");
   const [uploading, setUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [csvImporting, setCsvImporting] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
@@ -167,6 +171,70 @@ export default function ProductManager() {
     },
   });
 
+  const bulkCategoryMutation = useMutation({
+    mutationFn: async ({ ids, category }: { ids: string[]; category: string }) => {
+      const { error } = await supabase.from("products").update({ category }).in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cms-products"] });
+      setSelectedIds(new Set());
+      setBulkCategoryOpen(false);
+      setBulkCategory("");
+      toast({ title: "Category updated for selected products" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split("\n").filter((l) => l.trim());
+      if (lines.length < 2) throw new Error("CSV must have a header row and at least one data row");
+      
+      const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+      const nameIdx = headers.indexOf("name");
+      const catIdx = headers.indexOf("category");
+      const typeIdx = headers.indexOf("type");
+      const priceIdx = headers.indexOf("price");
+      const descIdx = headers.indexOf("description");
+
+      if (nameIdx === -1 || catIdx === -1) throw new Error("CSV must have 'Name' and 'Category' columns");
+
+      const parseCsvField = (field: string) => field.replace(/^"|"$/g, "").replace(/""/g, '"').trim();
+
+      const rows = lines.slice(1).map((line) => {
+        const cols = line.match(/(".*?"|[^,]+)/g)?.map(parseCsvField) ?? [];
+        const productType = typeIdx !== -1 ? (cols[typeIdx]?.toLowerCase() === "audio" ? "audio" : "spares") : "spares";
+        return {
+          name: cols[nameIdx] ?? "",
+          category: cols[catIdx] ?? "",
+          product_type: productType as "spares" | "audio",
+          price: priceIdx !== -1 && cols[priceIdx] ? parseFloat(cols[priceIdx]) || null : null,
+          description: descIdx !== -1 ? cols[descIdx] || null : null,
+        };
+      }).filter((r) => r.name && r.category);
+
+      if (!rows.length) throw new Error("No valid rows found in CSV");
+
+      const { error } = await supabase.from("products").insert(rows);
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["cms-products"] });
+      toast({ title: `${rows.length} products imported successfully` });
+    } catch (err: any) {
+      toast({ title: "Import failed", description: err.message, variant: "destructive" });
+    } finally {
+      setCsvImporting(false);
+      e.target.value = "";
+    }
+  };
+
   const resetForm = () => {
     setForm(emptyForm);
     setEditingProduct(null);
@@ -282,7 +350,12 @@ export default function ProductManager() {
           <h2 className="text-2xl font-heading font-bold text-foreground">Products</h2>
           <p className="text-muted-foreground text-sm">Manage your product catalog</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <label className={`inline-flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors ${csvImporting ? "opacity-50 pointer-events-none" : ""}`}>
+            <FileUp className="w-4 h-4" />
+            {csvImporting ? "Importing..." : "Import CSV"}
+            <input type="file" accept=".csv" className="hidden" onChange={handleCsvImport} disabled={csvImporting} />
+          </label>
           <Button variant="outline" size="sm" className="gap-2" onClick={exportCsv}>
             <Download className="w-4 h-4" /> Export CSV
           </Button>
@@ -427,20 +500,31 @@ export default function ProductManager() {
           </SelectContent>
         </Select>
         {selectedIds.size > 0 && (
-          <Button
-            variant="destructive"
-            size="sm"
-            className="gap-2"
-            disabled={bulkDeleteMutation.isPending}
-            onClick={() => {
-              if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
-                bulkDeleteMutation.mutate(Array.from(selectedIds));
-              }
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete {selectedIds.size} selected
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setBulkCategoryOpen(true)}
+            >
+              <FolderEdit className="w-4 h-4" />
+              Change Category ({selectedIds.size})
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-2"
+              disabled={bulkDeleteMutation.isPending}
+              onClick={() => {
+                if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
+                  bulkDeleteMutation.mutate(Array.from(selectedIds));
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete {selectedIds.size}
+            </Button>
+          </>
         )}
       </div>
 
@@ -528,6 +612,33 @@ export default function ProductManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Bulk Category Change Dialog */}
+      <BulkDialog open={bulkCategoryOpen} onOpenChange={setBulkCategoryOpen}>
+        <BulkDialogContent className="max-w-sm">
+          <BulkDialogHeader>
+            <BulkDialogTitle className="font-heading">Change Category</BulkDialogTitle>
+          </BulkDialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">Set a new category for {selectedIds.size} selected product(s).</p>
+            <Input
+              placeholder="New category name"
+              value={bulkCategory}
+              onChange={(e) => setBulkCategory(e.target.value)}
+            />
+            <div className="flex gap-3">
+              <Button
+                className="flex-1"
+                disabled={!bulkCategory.trim() || bulkCategoryMutation.isPending}
+                onClick={() => bulkCategoryMutation.mutate({ ids: Array.from(selectedIds), category: bulkCategory.trim() })}
+              >
+                {bulkCategoryMutation.isPending ? "Updating..." : "Apply"}
+              </Button>
+              <Button variant="outline" onClick={() => setBulkCategoryOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        </BulkDialogContent>
+      </BulkDialog>
     </div>
   );
 }

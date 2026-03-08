@@ -3,10 +3,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, MessageSquare, LayoutDashboard } from "lucide-react";
+import { LogOut, Package, MessageSquare, LayoutDashboard, Settings, FileText, BarChart3 } from "lucide-react";
 import ProductManager from "@/components/cms/ProductManager";
 import InquiryManager from "@/components/cms/InquiryManager";
-import DashboardOverview from "@/components/cms/DashboardOverview";
+import AnalyticsDashboard from "@/components/cms/AnalyticsDashboard";
+import SettingsManager from "@/components/cms/SettingsManager";
+import ContentEditor from "@/components/cms/ContentEditor";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 export default function CmsDashboard() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -47,20 +50,23 @@ export default function CmsDashboard() {
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground hover:text-foreground">
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <DarkModeToggle />
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground hover:text-foreground">
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-8 bg-card border border-border/50">
+          <TabsList className="mb-8 bg-card border border-border/50 flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="overview" className="gap-2">
-              <LayoutDashboard className="w-4 h-4" />
-              Overview
+              <BarChart3 className="w-4 h-4" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="products" className="gap-2">
               <Package className="w-4 h-4" />
@@ -70,16 +76,30 @@ export default function CmsDashboard() {
               <MessageSquare className="w-4 h-4" />
               Inquiries
             </TabsTrigger>
+            <TabsTrigger value="content" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Content
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
-            <DashboardOverview />
+            <AnalyticsDashboard />
           </TabsContent>
           <TabsContent value="products">
             <ProductManager />
           </TabsContent>
           <TabsContent value="inquiries">
             <InquiryManager />
+          </TabsContent>
+          <TabsContent value="content">
+            <ContentEditor />
+          </TabsContent>
+          <TabsContent value="settings">
+            <SettingsManager />
           </TabsContent>
         </Tabs>
       </main>
