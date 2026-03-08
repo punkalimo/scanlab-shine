@@ -10,6 +10,7 @@ import Layout from "@/components/Layout";
 import ProductGallery from "@/components/ProductGallery";
 import ProductCompare from "@/components/ProductCompare";
 import WhatsAppEnquire from "@/components/WhatsAppEnquire";
+import NoResultsInquiry from "@/components/NoResultsInquiry";
 import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["All", "International", "Freightliner", "Volvo", "Scania", "Howo", "Trailer", "Filters", "Batteries"];
@@ -77,10 +78,7 @@ export default function Spares() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            <p className="text-lg">No products found.</p>
-            <p className="text-sm mt-1">Check back soon — we're adding new inventory regularly!</p>
-          </div>
+          <NoResultsInquiry search={search} productType="truck & trailer spares" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filtered.map((product) => (
