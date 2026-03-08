@@ -3,12 +3,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Package, MessageSquare, LayoutDashboard, Settings, FileText, BarChart3 } from "lucide-react";
+import { LogOut, Package, MessageSquare, LayoutDashboard, Settings, FileText, BarChart3, Tag } from "lucide-react";
 import ProductManager from "@/components/cms/ProductManager";
 import InquiryManager from "@/components/cms/InquiryManager";
 import AnalyticsDashboard from "@/components/cms/AnalyticsDashboard";
 import SettingsManager from "@/components/cms/SettingsManager";
 import ContentEditor from "@/components/cms/ContentEditor";
+import BrandsManager from "@/components/cms/BrandsManager";
 import DarkModeToggle from "@/components/DarkModeToggle";
 
 export default function CmsDashboard() {
