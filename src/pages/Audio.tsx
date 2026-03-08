@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
+import ProductGallery from "@/components/ProductGallery";
 import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["All", "Speakers", "Subwoofers", "Amplifiers", "Head Units", "Alarms", "Dash Cams", "Accessories"];
@@ -12,6 +13,7 @@ const CATEGORIES = ["All", "Speakers", "Subwoofers", "Amplifiers", "Head Units",
 export default function Audio() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null } | null>(null);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "audio"],
@@ -70,7 +72,11 @@ export default function Audio() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filtered.map((product) => (
-              <Card key={product.id} className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
+              <Card
+                key={product.id}
+                className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url })}
+              >
                 <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
@@ -89,6 +95,16 @@ export default function Audio() {
           </div>
         )}
       </section>
+
+      {galleryProduct && (
+        <ProductGallery
+          productId={galleryProduct.id}
+          mainImageUrl={galleryProduct.image_url}
+          productName={galleryProduct.name}
+          open={!!galleryProduct}
+          onOpenChange={(open) => !open && setGalleryProduct(null)}
+        />
+      )}
     </Layout>
   );
 }
