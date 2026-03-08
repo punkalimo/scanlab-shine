@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Home, Info, Megaphone } from "lucide-react";
+import { Save, Home, Info, Megaphone, Star, Megaphone as CtaIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 export default function ContentEditor() {
   const [heroContent, setHeroContent] = useState<Record<string, string>>({});
   const [aboutContent, setAboutContent] = useState<Record<string, string>>({});
+  const [featuresContent, setFeaturesContent] = useState<Record<string, string>>({});
+  const [ctaContent, setCtaContent] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const queryClient = useQueryClient();
 
@@ -29,8 +31,12 @@ export default function ContentEditor() {
     if (pages) {
       const hero = pages.find((p: any) => p.page_key === "homepage_hero");
       const about = pages.find((p: any) => p.page_key === "about");
+      const features = pages.find((p: any) => p.page_key === "features");
+      const cta = pages.find((p: any) => p.page_key === "cta");
       if (hero) setHeroContent(hero.content as any);
       if (about) setAboutContent(about.content as any);
+      if (features) setFeaturesContent(features.content as any);
+      if (cta) setCtaContent(cta.content as any);
       setHasChanges(false);
     }
   }, [pages]);
@@ -38,12 +44,31 @@ export default function ContentEditor() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const now = new Date().toISOString();
-      const [r1, r2] = await Promise.all([
-        supabase.from("content_pages").update({ content: heroContent as any, updated_at: now }).eq("page_key", "homepage_hero"),
-        supabase.from("content_pages").update({ content: aboutContent as any, updated_at: now }).eq("page_key", "about"),
-      ]);
-      if (r1.error) throw r1.error;
-      if (r2.error) throw r2.error;
+      const upserts = [
+        { page_key: "homepage_hero", content: heroContent, title: "Homepage Hero" },
+        { page_key: "about", content: aboutContent, title: "About" },
+        { page_key: "features", content: featuresContent, title: "Why Choose Us" },
+        { page_key: "cta", content: ctaContent, title: "CTA Section" },
+      ];
+      for (const item of upserts) {
+        const { data: existing } = await supabase
+          .from("content_pages")
+          .select("id")
+          .eq("page_key", item.page_key)
+          .maybeSingle();
+        if (existing) {
+          const { error } = await supabase
+            .from("content_pages")
+            .update({ content: item.content as any, updated_at: now })
+            .eq("page_key", item.page_key);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("content_pages")
+            .insert({ page_key: item.page_key, title: item.title, content: item.content as any });
+          if (error) throw error;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cms-content-pages"] });
@@ -62,6 +87,16 @@ export default function ContentEditor() {
 
   const updateAbout = (key: string, value: string) => {
     setAboutContent((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  const updateFeatures = (key: string, value: string) => {
+    setFeaturesContent((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  const updateCta = (key: string, value: string) => {
+    setCtaContent((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
@@ -87,9 +122,11 @@ export default function ContentEditor() {
       </div>
 
       <Tabs defaultValue="hero">
-        <TabsList className="bg-card border border-border/50">
-          <TabsTrigger value="hero" className="gap-2"><Home className="w-4 h-4" /> Homepage Hero</TabsTrigger>
-          <TabsTrigger value="about" className="gap-2"><Info className="w-4 h-4" /> About Page</TabsTrigger>
+        <TabsList className="bg-card border border-border/50 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="hero" className="gap-2"><Home className="w-4 h-4" /> Hero</TabsTrigger>
+          <TabsTrigger value="features" className="gap-2"><Star className="w-4 h-4" /> Why Choose Us</TabsTrigger>
+          <TabsTrigger value="cta" className="gap-2"><Megaphone className="w-4 h-4" /> CTA</TabsTrigger>
+          <TabsTrigger value="about" className="gap-2"><Info className="w-4 h-4" /> About</TabsTrigger>
         </TabsList>
 
         <TabsContent value="hero" className="mt-6">
@@ -143,6 +180,68 @@ export default function ContentEditor() {
               <div className="space-y-2">
                 <Label>Paragraph 2</Label>
                 <Textarea value={aboutContent.story_p2 ?? ""} onChange={(e) => updateAbout("story_p2", e.target.value)} rows={4} />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="features" className="mt-6">
+          <Card className="border-border/50">
+            <CardContent className="pt-6 space-y-6">
+              <p className="text-sm text-muted-foreground">Edit the three feature highlights shown in the "Why Choose Us" section.</p>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-3 p-4 rounded-lg border border-border/30 bg-muted/20">
+                  <h4 className="text-sm font-medium text-foreground">Feature {i}</h4>
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={featuresContent[`f${i}_title`] ?? ""}
+                      onChange={(e) => updateFeatures(`f${i}_title`, e.target.value)}
+                      placeholder={i === 1 ? "Genuine Products" : i === 2 ? "Wide Range" : "Zambian Owned"}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={featuresContent[`f${i}_desc`] ?? ""}
+                      onChange={(e) => updateFeatures(`f${i}_desc`, e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cta" className="mt-6">
+          <Card className="border-border/50">
+            <CardContent className="pt-6 space-y-4">
+              <p className="text-sm text-muted-foreground">Edit the call-to-action banner at the bottom of the homepage.</p>
+              <div className="space-y-2">
+                <Label>Heading</Label>
+                <Input
+                  value={ctaContent.heading ?? ""}
+                  onChange={(e) => updateCta("heading", e.target.value)}
+                  placeholder="Need Motor Spares?"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subtext</Label>
+                <Textarea
+                  value={ctaContent.subtext ?? ""}
+                  onChange={(e) => updateCta("subtext", e.target.value)}
+                  rows={3}
+                  placeholder="Get in touch with us today..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Button Text</Label>
+                <Input
+                  value={ctaContent.button_text ?? ""}
+                  onChange={(e) => updateCta("button_text", e.target.value)}
+                  placeholder="Contact Us"
+                />
               </div>
             </CardContent>
           </Card>

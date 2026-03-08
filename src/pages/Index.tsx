@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Truck, Music, Shield, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import FacebookPosts from "@/components/FacebookPosts";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -10,6 +12,7 @@ import heroTrucks from "@/assets/hero-trucks.jpg";
 import heroSpares from "@/assets/hero-spares.jpg";
 import heroAudio from "@/assets/hero-audio.jpg";
 
+// Static logo fallback map
 import logoInternational from "@/assets/brands/international.png";
 import logoFreightliner from "@/assets/brands/freightliner.png";
 import logoVolvo from "@/assets/brands/volvo.png";
@@ -27,7 +30,15 @@ import logoSony from "@/assets/brands/sony.png";
 import logoAlpine from "@/assets/brands/alpine.png";
 import logoBlaupunkt from "@/assets/brands/blaupunkt.png";
 
-const features = [
+const staticLogos: Record<string, string> = {
+  International: logoInternational, Freightliner: logoFreightliner,
+  Volvo: logoVolvo, Scania: logoScania, Howo: logoHowo, MAN: logoMan,
+  DAF: logoDaf, Isuzu: logoIsuzu, Mitsubishi: logoMitsubishi, Toyota: logoToyota,
+  Pioneer: logoPioneer, JBL: logoJbl, Kenwood: logoKenwood, Sony: logoSony,
+  Alpine: logoAlpine, Blaupunkt: logoBlaupunkt,
+};
+
+const defaultFeatures = [
   {
     icon: Shield,
     title: "Genuine Products",
@@ -45,29 +56,54 @@ const features = [
   },
 ];
 
-const truckBrands = [
-  { name: "International", logo: logoInternational },
-  { name: "Freightliner", logo: logoFreightliner },
-  { name: "Volvo", logo: logoVolvo },
-  { name: "Scania", logo: logoScania },
-  { name: "Howo", logo: logoHowo },
-  { name: "MAN", logo: logoMan },
-  { name: "DAF", logo: logoDaf },
-  { name: "Isuzu", logo: logoIsuzu },
-  { name: "Mitsubishi", logo: logoMitsubishi },
-  { name: "Toyota", logo: logoToyota },
-];
-
-const audioBrands = [
-  { name: "Pioneer", logo: logoPioneer },
-  { name: "JBL", logo: logoJbl },
-  { name: "Kenwood", logo: logoKenwood },
-  { name: "Sony", logo: logoSony },
-  { name: "Alpine", logo: logoAlpine },
-  { name: "Blaupunkt", logo: logoBlaupunkt },
-];
+const featureIcons = [Shield, Truck, Star];
 
 export default function Index() {
+  // Fetch dynamic brands
+  const { data: dbBrands = [] } = useQuery({
+    queryKey: ["public-brands"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("brands")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch dynamic content
+  const { data: contentPages = [] } = useQuery({
+    queryKey: ["public-content-pages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("content_pages").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const truckBrands = dbBrands
+    .filter((b) => b.brand_type === "truck")
+    .map((b) => ({ name: b.name, logo: b.logo_url || staticLogos[b.name] || "" }));
+  const audioBrands = dbBrands
+    .filter((b) => b.brand_type === "audio")
+    .map((b) => ({ name: b.name, logo: b.logo_url || staticLogos[b.name] || "" }));
+
+  // Content from CMS
+  const heroPage = contentPages.find((p) => p.page_key === "homepage_hero");
+  const heroContent = (heroPage?.content as Record<string, string>) || {};
+  const featuresPage = contentPages.find((p) => p.page_key === "features");
+  const featuresContent = (featuresPage?.content as Record<string, string>) || {};
+  const ctaPage = contentPages.find((p) => p.page_key === "cta");
+  const ctaContent = (ctaPage?.content as Record<string, string>) || {};
+
+  const features = defaultFeatures.map((f, i) => ({
+    ...f,
+    icon: featureIcons[i],
+    title: featuresContent[`f${i + 1}_title`] || f.title,
+    description: featuresContent[`f${i + 1}_desc`] || f.description,
+  }));
   return (
     <Layout>
       {/* Hero with background image */}
@@ -84,14 +120,13 @@ export default function Index() {
             className="max-w-2xl"
           >
             <span className="inline-block rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-primary mb-6">
-              New Generation of Genuine Products
+              {heroContent.tagline || "New Generation of Genuine Products"}
             </span>
             <h1 className="text-4xl md:text-6xl font-heading font-bold leading-tight text-nav-foreground">
-              Your Trusted Partner for{" "}
-              <span className="text-primary">Motor Spares</span> in Zambia
+              {heroContent.heading || <>Your Trusted Partner for{" "}<span className="text-primary">Motor Spares</span> in Zambia</>}
             </h1>
             <p className="mt-6 text-lg text-nav-foreground/70 max-w-lg">
-              Quality truck & trailer spares and premium car audio accessories — all under one roof at ScanLab Motor Spares.
+              {heroContent.subtext || "Quality truck & trailer spares and premium car audio accessories — all under one roof at ScanLab Motor Spares."}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to="/spares">
@@ -277,13 +312,13 @@ export default function Index() {
           viewport={{ once: true }}
           className="rounded-2xl bg-primary p-12 text-primary-foreground"
         >
-          <h2 className="text-3xl md:text-4xl font-heading font-bold">Need Motor Spares?</h2>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold">{ctaContent.heading || "Need Motor Spares?"}</h2>
           <p className="mt-3 text-primary-foreground/80 max-w-md mx-auto">
-            Get in touch with us today for competitive prices and expert advice on all your motor spares needs.
+            {ctaContent.subtext || "Get in touch with us today for competitive prices and expert advice on all your motor spares needs."}
           </p>
           <Link to="/contact">
             <Button size="lg" variant="secondary" className="mt-6 gap-2">
-              Contact Us <ArrowRight className="h-4 w-4" />
+              {ctaContent.button_text || "Contact Us"} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </motion.div>
