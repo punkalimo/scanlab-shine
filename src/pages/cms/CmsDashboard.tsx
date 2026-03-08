@@ -81,6 +81,10 @@ export default function CmsDashboard() {
               <FileText className="w-4 h-4" />
               Content
             </TabsTrigger>
+            <TabsTrigger value="brands" className="gap-2">
+              <Tag className="w-4 h-4" />
+              Brands
+            </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="w-4 h-4" />
               Settings
