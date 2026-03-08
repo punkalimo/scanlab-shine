@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Truck, Music, Shield, Star, ArrowRight, Headphones, Wrench, Settings } from "lucide-react";
+import { Truck, Music, Shield, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import FacebookPosts from "@/components/FacebookPosts";
@@ -9,6 +9,23 @@ import HeroSearch from "@/components/HeroSearch";
 import heroTrucks from "@/assets/hero-trucks.jpg";
 import heroSpares from "@/assets/hero-spares.jpg";
 import heroAudio from "@/assets/hero-audio.jpg";
+
+import logoInternational from "@/assets/brands/international.png";
+import logoFreightliner from "@/assets/brands/freightliner.png";
+import logoVolvo from "@/assets/brands/volvo.png";
+import logoScania from "@/assets/brands/scania.png";
+import logoHowo from "@/assets/brands/howo.png";
+import logoMan from "@/assets/brands/man.png";
+import logoDaf from "@/assets/brands/daf.png";
+import logoIsuzu from "@/assets/brands/isuzu.png";
+import logoMitsubishi from "@/assets/brands/mitsubishi.png";
+import logoToyota from "@/assets/brands/toyota.png";
+import logoPioneer from "@/assets/brands/pioneer.png";
+import logoJbl from "@/assets/brands/jbl.png";
+import logoKenwood from "@/assets/brands/kenwood.png";
+import logoSony from "@/assets/brands/sony.png";
+import logoAlpine from "@/assets/brands/alpine.png";
+import logoBlaupunkt from "@/assets/brands/blaupunkt.png";
 
 const features = [
   {
@@ -29,25 +46,25 @@ const features = [
 ];
 
 const truckBrands = [
-  { name: "International", icon: Truck },
-  { name: "Freightliner", icon: Truck },
-  { name: "Volvo", icon: Truck },
-  { name: "Scania", icon: Truck },
-  { name: "Howo", icon: Truck },
-  { name: "MAN", icon: Truck },
-  { name: "DAF", icon: Truck },
-  { name: "Isuzu", icon: Truck },
-  { name: "Mitsubishi", icon: Settings },
-  { name: "Toyota", icon: Wrench },
+  { name: "International", logo: logoInternational },
+  { name: "Freightliner", logo: logoFreightliner },
+  { name: "Volvo", logo: logoVolvo },
+  { name: "Scania", logo: logoScania },
+  { name: "Howo", logo: logoHowo },
+  { name: "MAN", logo: logoMan },
+  { name: "DAF", logo: logoDaf },
+  { name: "Isuzu", logo: logoIsuzu },
+  { name: "Mitsubishi", logo: logoMitsubishi },
+  { name: "Toyota", logo: logoToyota },
 ];
 
 const audioBrands = [
-  { name: "Pioneer", icon: Headphones },
-  { name: "JBL", icon: Music },
-  { name: "Kenwood", icon: Headphones },
-  { name: "Sony", icon: Music },
-  { name: "Alpine", icon: Headphones },
-  { name: "Blaupunkt", icon: Music },
+  { name: "Pioneer", logo: logoPioneer },
+  { name: "JBL", logo: logoJbl },
+  { name: "Kenwood", logo: logoKenwood },
+  { name: "Sony", logo: logoSony },
+  { name: "Alpine", logo: logoAlpine },
+  { name: "Blaupunkt", logo: logoBlaupunkt },
 ];
 
 export default function Index() {
