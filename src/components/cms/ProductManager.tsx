@@ -394,12 +394,24 @@ export default function ProductManager() {
                     onClick={async () => {
                       setAiGenerating(true);
                       try {
+                        let imageForAi: string | undefined;
+                        if (form.mainImage) {
+                          // Convert local file to base64 data URL for AI vision
+                          imageForAi = await new Promise<string>((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result as string);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(form.mainImage!);
+                          });
+                        } else if (mainImagePreview) {
+                          imageForAi = mainImagePreview;
+                        }
                         const { data, error } = await supabase.functions.invoke("generate-description", {
                           body: {
                             name: form.name,
                             category: form.category,
                             product_type: form.product_type,
-                            image_url: mainImagePreview && !form.mainImage ? mainImagePreview : undefined,
+                            image_url: imageForAi,
                           },
                         });
                         if (error) throw error;
