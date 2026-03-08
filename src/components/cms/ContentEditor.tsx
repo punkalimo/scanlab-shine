@@ -122,9 +122,11 @@ export default function ContentEditor() {
       </div>
 
       <Tabs defaultValue="hero">
-        <TabsList className="bg-card border border-border/50">
-          <TabsTrigger value="hero" className="gap-2"><Home className="w-4 h-4" /> Homepage Hero</TabsTrigger>
-          <TabsTrigger value="about" className="gap-2"><Info className="w-4 h-4" /> About Page</TabsTrigger>
+        <TabsList className="bg-card border border-border/50 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="hero" className="gap-2"><Home className="w-4 h-4" /> Hero</TabsTrigger>
+          <TabsTrigger value="features" className="gap-2"><Star className="w-4 h-4" /> Why Choose Us</TabsTrigger>
+          <TabsTrigger value="cta" className="gap-2"><Megaphone className="w-4 h-4" /> CTA</TabsTrigger>
+          <TabsTrigger value="about" className="gap-2"><Info className="w-4 h-4" /> About</TabsTrigger>
         </TabsList>
 
         <TabsContent value="hero" className="mt-6">
