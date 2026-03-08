@@ -350,7 +350,12 @@ export default function ProductManager() {
           <h2 className="text-2xl font-heading font-bold text-foreground">Products</h2>
           <p className="text-muted-foreground text-sm">Manage your product catalog</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <label className={`inline-flex items-center gap-2 cursor-pointer rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors ${csvImporting ? "opacity-50 pointer-events-none" : ""}`}>
+            <FileUp className="w-4 h-4" />
+            {csvImporting ? "Importing..." : "Import CSV"}
+            <input type="file" accept=".csv" className="hidden" onChange={handleCsvImport} disabled={csvImporting} />
+          </label>
           <Button variant="outline" size="sm" className="gap-2" onClick={exportCsv}>
             <Download className="w-4 h-4" /> Export CSV
           </Button>
