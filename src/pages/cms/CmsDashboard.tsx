@@ -103,6 +103,9 @@ export default function CmsDashboard() {
           <TabsContent value="content">
             <ContentEditor />
           </TabsContent>
+          <TabsContent value="brands">
+            <BrandsManager />
+          </TabsContent>
           <TabsContent value="settings">
             <SettingsManager />
           </TabsContent>

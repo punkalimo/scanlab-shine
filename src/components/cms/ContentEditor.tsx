@@ -184,6 +184,68 @@ export default function ContentEditor() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="features" className="mt-6">
+          <Card className="border-border/50">
+            <CardContent className="pt-6 space-y-6">
+              <p className="text-sm text-muted-foreground">Edit the three feature highlights shown in the "Why Choose Us" section.</p>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-3 p-4 rounded-lg border border-border/30 bg-muted/20">
+                  <h4 className="text-sm font-medium text-foreground">Feature {i}</h4>
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={featuresContent[`f${i}_title`] ?? ""}
+                      onChange={(e) => updateFeatures(`f${i}_title`, e.target.value)}
+                      placeholder={i === 1 ? "Genuine Products" : i === 2 ? "Wide Range" : "Zambian Owned"}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={featuresContent[`f${i}_desc`] ?? ""}
+                      onChange={(e) => updateFeatures(`f${i}_desc`, e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cta" className="mt-6">
+          <Card className="border-border/50">
+            <CardContent className="pt-6 space-y-4">
+              <p className="text-sm text-muted-foreground">Edit the call-to-action banner at the bottom of the homepage.</p>
+              <div className="space-y-2">
+                <Label>Heading</Label>
+                <Input
+                  value={ctaContent.heading ?? ""}
+                  onChange={(e) => updateCta("heading", e.target.value)}
+                  placeholder="Need Motor Spares?"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subtext</Label>
+                <Textarea
+                  value={ctaContent.subtext ?? ""}
+                  onChange={(e) => updateCta("subtext", e.target.value)}
+                  rows={3}
+                  placeholder="Get in touch with us today..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Button Text</Label>
+                <Input
+                  value={ctaContent.button_text ?? ""}
+                  onChange={(e) => updateCta("button_text", e.target.value)}
+                  placeholder="Contact Us"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
