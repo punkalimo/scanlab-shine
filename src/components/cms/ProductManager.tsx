@@ -171,6 +171,70 @@ export default function ProductManager() {
     },
   });
 
+  const bulkCategoryMutation = useMutation({
+    mutationFn: async ({ ids, category }: { ids: string[]; category: string }) => {
+      const { error } = await supabase.from("products").update({ category }).in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cms-products"] });
+      setSelectedIds(new Set());
+      setBulkCategoryOpen(false);
+      setBulkCategory("");
+      toast({ title: "Category updated for selected products" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split("\n").filter((l) => l.trim());
+      if (lines.length < 2) throw new Error("CSV must have a header row and at least one data row");
+      
+      const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+      const nameIdx = headers.indexOf("name");
+      const catIdx = headers.indexOf("category");
+      const typeIdx = headers.indexOf("type");
+      const priceIdx = headers.indexOf("price");
+      const descIdx = headers.indexOf("description");
+
+      if (nameIdx === -1 || catIdx === -1) throw new Error("CSV must have 'Name' and 'Category' columns");
+
+      const parseCsvField = (field: string) => field.replace(/^"|"$/g, "").replace(/""/g, '"').trim();
+
+      const rows = lines.slice(1).map((line) => {
+        const cols = line.match(/(".*?"|[^,]+)/g)?.map(parseCsvField) ?? [];
+        const productType = typeIdx !== -1 ? (cols[typeIdx]?.toLowerCase() === "audio" ? "audio" : "spares") : "spares";
+        return {
+          name: cols[nameIdx] ?? "",
+          category: cols[catIdx] ?? "",
+          product_type: productType as "spares" | "audio",
+          price: priceIdx !== -1 && cols[priceIdx] ? parseFloat(cols[priceIdx]) || null : null,
+          description: descIdx !== -1 ? cols[descIdx] || null : null,
+        };
+      }).filter((r) => r.name && r.category);
+
+      if (!rows.length) throw new Error("No valid rows found in CSV");
+
+      const { error } = await supabase.from("products").insert(rows);
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["cms-products"] });
+      toast({ title: `${rows.length} products imported successfully` });
+    } catch (err: any) {
+      toast({ title: "Import failed", description: err.message, variant: "destructive" });
+    } finally {
+      setCsvImporting(false);
+      e.target.value = "";
+    }
+  };
+
   const resetForm = () => {
     setForm(emptyForm);
     setEditingProduct(null);
