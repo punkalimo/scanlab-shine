@@ -10,6 +10,7 @@ import Layout from "@/components/Layout";
 import ProductGallery from "@/components/ProductGallery";
 import ProductCompare from "@/components/ProductCompare";
 import WhatsAppEnquire from "@/components/WhatsAppEnquire";
+import NoResultsInquiry from "@/components/NoResultsInquiry";
 import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["All", "International", "Freightliner", "Volvo", "Scania", "Howo", "Trailer", "Filters", "Batteries"];
