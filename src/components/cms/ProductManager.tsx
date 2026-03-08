@@ -50,6 +50,9 @@ export default function ProductManager() {
   const [filterType, setFilterType] = useState<string>("all");
   const [uploading, setUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("");
+  const [csvImporting, setCsvImporting] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
