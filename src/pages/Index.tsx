@@ -120,14 +120,13 @@ export default function Index() {
             className="max-w-2xl"
           >
             <span className="inline-block rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-primary mb-6">
-              New Generation of Genuine Products
+              {heroContent.tagline || "New Generation of Genuine Products"}
             </span>
             <h1 className="text-4xl md:text-6xl font-heading font-bold leading-tight text-nav-foreground">
-              Your Trusted Partner for{" "}
-              <span className="text-primary">Motor Spares</span> in Zambia
+              {heroContent.heading || <>Your Trusted Partner for{" "}<span className="text-primary">Motor Spares</span> in Zambia</>}
             </h1>
             <p className="mt-6 text-lg text-nav-foreground/70 max-w-lg">
-              Quality truck & trailer spares and premium car audio accessories — all under one roof at ScanLab Motor Spares.
+              {heroContent.subtext || "Quality truck & trailer spares and premium car audio accessories — all under one roof at ScanLab Motor Spares."}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to="/spares">
