@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Truck, Music, Shield, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import FacebookPosts from "@/components/FacebookPosts";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -10,6 +12,7 @@ import heroTrucks from "@/assets/hero-trucks.jpg";
 import heroSpares from "@/assets/hero-spares.jpg";
 import heroAudio from "@/assets/hero-audio.jpg";
 
+// Static logo fallback map
 import logoInternational from "@/assets/brands/international.png";
 import logoFreightliner from "@/assets/brands/freightliner.png";
 import logoVolvo from "@/assets/brands/volvo.png";
@@ -27,7 +30,15 @@ import logoSony from "@/assets/brands/sony.png";
 import logoAlpine from "@/assets/brands/alpine.png";
 import logoBlaupunkt from "@/assets/brands/blaupunkt.png";
 
-const features = [
+const staticLogos: Record<string, string> = {
+  International: logoInternational, Freightliner: logoFreightliner,
+  Volvo: logoVolvo, Scania: logoScania, Howo: logoHowo, MAN: logoMan,
+  DAF: logoDaf, Isuzu: logoIsuzu, Mitsubishi: logoMitsubishi, Toyota: logoToyota,
+  Pioneer: logoPioneer, JBL: logoJbl, Kenwood: logoKenwood, Sony: logoSony,
+  Alpine: logoAlpine, Blaupunkt: logoBlaupunkt,
+};
+
+const defaultFeatures = [
   {
     icon: Shield,
     title: "Genuine Products",
@@ -43,28 +54,6 @@ const features = [
     title: "Zambian Owned",
     description: "Proudly Zambian, serving the local transport industry with dedication since day one.",
   },
-];
-
-const truckBrands = [
-  { name: "International", logo: logoInternational },
-  { name: "Freightliner", logo: logoFreightliner },
-  { name: "Volvo", logo: logoVolvo },
-  { name: "Scania", logo: logoScania },
-  { name: "Howo", logo: logoHowo },
-  { name: "MAN", logo: logoMan },
-  { name: "DAF", logo: logoDaf },
-  { name: "Isuzu", logo: logoIsuzu },
-  { name: "Mitsubishi", logo: logoMitsubishi },
-  { name: "Toyota", logo: logoToyota },
-];
-
-const audioBrands = [
-  { name: "Pioneer", logo: logoPioneer },
-  { name: "JBL", logo: logoJbl },
-  { name: "Kenwood", logo: logoKenwood },
-  { name: "Sony", logo: logoSony },
-  { name: "Alpine", logo: logoAlpine },
-  { name: "Blaupunkt", logo: logoBlaupunkt },
 ];
 
 export default function Index() {
