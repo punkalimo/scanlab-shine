@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download, FileUp, FolderEdit } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, Search, Package, ImagePlus, Download, FileUp, FolderEdit, Sparkles, Loader2 } from "lucide-react";
 import { Dialog as BulkDialog, DialogContent as BulkDialogContent, DialogHeader as BulkDialogHeader, DialogTitle as BulkDialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -53,6 +53,7 @@ export default function ProductManager() {
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("");
   const [csvImporting, setCsvImporting] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
@@ -382,8 +383,43 @@ export default function ProductManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} maxLength={1000} />
+                <div className="flex items-center justify-between">
+                  <Label>Description</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 h-7 text-xs"
+                    disabled={aiGenerating || !form.name}
+                    onClick={async () => {
+                      setAiGenerating(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke("generate-description", {
+                          body: {
+                            name: form.name,
+                            category: form.category,
+                            product_type: form.product_type,
+                            image_url: mainImagePreview && !form.mainImage ? mainImagePreview : undefined,
+                          },
+                        });
+                        if (error) throw error;
+                        if (data?.error) throw new Error(data.error);
+                        if (data?.description) {
+                          setForm((prev) => ({ ...prev, description: data.description }));
+                          toast({ title: "Description generated" });
+                        }
+                      } catch (err: any) {
+                        toast({ title: "AI generation failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setAiGenerating(false);
+                      }
+                    }}
+                  >
+                    {aiGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                    {aiGenerating ? "Generating..." : "AI Suggest"}
+                  </Button>
+                </div>
+                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} maxLength={1000} placeholder="Enter description or use AI Suggest" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
