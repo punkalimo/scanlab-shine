@@ -19,7 +19,7 @@ export default function Spares() {
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [category, setCategory] = useState("All");
-  const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null } | null>(null);
+  const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null; description: string | null; price: number | null; category: string } | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
   const { data: products = [], isLoading } = useQuery({
