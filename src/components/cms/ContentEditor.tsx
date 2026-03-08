@@ -90,6 +90,16 @@ export default function ContentEditor() {
     setHasChanges(true);
   };
 
+  const updateFeatures = (key: string, value: string) => {
+    setFeaturesContent((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
+  const updateCta = (key: string, value: string) => {
+    setCtaContent((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
