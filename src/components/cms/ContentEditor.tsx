@@ -44,12 +44,31 @@ export default function ContentEditor() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const now = new Date().toISOString();
-      const [r1, r2] = await Promise.all([
-        supabase.from("content_pages").update({ content: heroContent as any, updated_at: now }).eq("page_key", "homepage_hero"),
-        supabase.from("content_pages").update({ content: aboutContent as any, updated_at: now }).eq("page_key", "about"),
-      ]);
-      if (r1.error) throw r1.error;
-      if (r2.error) throw r2.error;
+      const upserts = [
+        { page_key: "homepage_hero", content: heroContent, title: "Homepage Hero" },
+        { page_key: "about", content: aboutContent, title: "About" },
+        { page_key: "features", content: featuresContent, title: "Why Choose Us" },
+        { page_key: "cta", content: ctaContent, title: "CTA Section" },
+      ];
+      for (const item of upserts) {
+        const { data: existing } = await supabase
+          .from("content_pages")
+          .select("id")
+          .eq("page_key", item.page_key)
+          .maybeSingle();
+        if (existing) {
+          const { error } = await supabase
+            .from("content_pages")
+            .update({ content: item.content as any, updated_at: now })
+            .eq("page_key", item.page_key);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("content_pages")
+            .insert({ page_key: item.page_key, title: item.title, content: item.content as any });
+          if (error) throw error;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cms-content-pages"] });
