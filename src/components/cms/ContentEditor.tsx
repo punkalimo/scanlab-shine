@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Home, Info, Megaphone } from "lucide-react";
+import { Save, Home, Info, Megaphone, Star, Megaphone as CtaIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 export default function ContentEditor() {
