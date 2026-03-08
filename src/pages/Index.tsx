@@ -4,6 +4,8 @@ import { Truck, Music, Shield, Star, ArrowRight, Headphones, Wrench, Settings } 
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import FacebookPosts from "@/components/FacebookPosts";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import HeroSearch from "@/components/HeroSearch";
 import heroTrucks from "@/assets/hero-trucks.jpg";
 import heroSpares from "@/assets/hero-spares.jpg";
 import heroAudio from "@/assets/hero-audio.jpg";
@@ -86,9 +88,15 @@ export default function Index() {
                 </Button>
               </Link>
             </div>
+
+            {/* Hero Search */}
+            <HeroSearch />
           </motion.div>
         </div>
       </section>
+
+      {/* Featured Products Carousel */}
+      <FeaturedProducts />
 
       {/* What We Offer - with images */}
       <section className="container py-20">

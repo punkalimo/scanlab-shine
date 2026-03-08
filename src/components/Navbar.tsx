@@ -4,6 +4,7 @@ import { Menu, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import DarkModeToggle from "./DarkModeToggle";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -42,10 +43,12 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <DarkModeToggle />
         </nav>
 
         {/* Mobile nav */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-1">
+          <DarkModeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-nav-foreground">
