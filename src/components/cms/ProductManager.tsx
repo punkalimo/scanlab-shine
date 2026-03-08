@@ -404,6 +404,7 @@ export default function ProductManager() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters & Bulk Actions */}
