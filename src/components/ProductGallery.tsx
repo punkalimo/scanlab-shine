@@ -15,7 +15,16 @@ interface ProductGalleryProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function ProductGallery({ productId, mainImageUrl, productName, open, onOpenChange }: ProductGalleryProps) {
+export default function ProductGallery({ 
+  productId, 
+  mainImageUrl, 
+  productName, 
+  productDescription,
+  productPrice,
+  productCategory,
+  open, 
+  onOpenChange 
+}: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const { data: galleryImages = [] } = useQuery({
