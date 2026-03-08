@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Truck, Music, Shield, Star, ArrowRight } from "lucide-react";
+import { Truck, Music, Shield, Star, ArrowRight, Headphones, Wrench, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
+import FacebookPosts from "@/components/FacebookPosts";
+import heroTrucks from "@/assets/hero-trucks.jpg";
+import heroSpares from "@/assets/hero-spares.jpg";
+import heroAudio from "@/assets/hero-audio.jpg";
 
 const features = [
   {
@@ -22,29 +26,37 @@ const features = [
   },
 ];
 
-const categories = [
-  {
-    title: "Truck & Trailer Spares",
-    description: "Engine parts, filters, batteries, brakes, and more for all major brands.",
-    icon: Truck,
-    link: "/spares",
-    color: "bg-primary",
-  },
-  {
-    title: "Audio & Accessories",
-    description: "Car audio systems, speakers, subwoofers, alarms, and dash cameras.",
-    icon: Music,
-    link: "/audio",
-    color: "bg-accent",
-  },
+const truckBrands = [
+  { name: "International", icon: Truck },
+  { name: "Freightliner", icon: Truck },
+  { name: "Volvo", icon: Truck },
+  { name: "Scania", icon: Truck },
+  { name: "Howo", icon: Truck },
+  { name: "MAN", icon: Truck },
+  { name: "DAF", icon: Truck },
+  { name: "Isuzu", icon: Truck },
+  { name: "Mitsubishi", icon: Settings },
+  { name: "Toyota", icon: Wrench },
+];
+
+const audioBrands = [
+  { name: "Pioneer", icon: Headphones },
+  { name: "JBL", icon: Music },
+  { name: "Kenwood", icon: Headphones },
+  { name: "Sony", icon: Music },
+  { name: "Alpine", icon: Headphones },
+  { name: "Blaupunkt", icon: Music },
 ];
 
 export default function Index() {
   return (
     <Layout>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-nav text-nav-foreground">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/10" />
+      {/* Hero with background image */}
+      <section className="relative overflow-hidden min-h-[80vh] flex items-center">
+        <div className="absolute inset-0">
+          <img src={heroTrucks} alt="Fleet of trucks" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-nav/80" />
+        </div>
         <div className="container relative py-24 md:py-36">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -55,12 +67,12 @@ export default function Index() {
             <span className="inline-block rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-primary mb-6">
               New Generation of Genuine Products
             </span>
-            <h1 className="text-4xl md:text-6xl font-heading font-bold leading-tight">
+            <h1 className="text-4xl md:text-6xl font-heading font-bold leading-tight text-nav-foreground">
               Your Trusted Partner for{" "}
               <span className="text-primary">Motor Spares</span> in Zambia
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-              Quality truck & trailer spares and premium car audio accessories — all under one roof at Scanlab Motor Spares.
+            <p className="mt-6 text-lg text-nav-foreground/70 max-w-lg">
+              Quality truck & trailer spares and premium car audio accessories — all under one roof at ScanLab Motor Spares.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to="/spares">
@@ -69,7 +81,7 @@ export default function Index() {
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-nav-foreground/30 text-nav-foreground hover:bg-nav-foreground/10">
+                <Button size="lg" variant="default" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
                   Get in Touch
                 </Button>
               </Link>
@@ -78,7 +90,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* What We Offer - with images */}
       <section className="container py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -92,7 +104,24 @@ export default function Index() {
           </p>
         </motion.div>
         <div className="grid md:grid-cols-2 gap-8">
-          {categories.map((cat, i) => (
+          {[
+            {
+              title: "Truck & Trailer Spares",
+              description: "Engine parts, filters, batteries, brakes, bearings, gaskets and more for all major truck and trailer brands.",
+              image: heroSpares,
+              link: "/spares",
+              color: "bg-primary",
+              icon: Truck,
+            },
+            {
+              title: "Audio & Accessories",
+              description: "Car audio systems, speakers, subwoofers, amplifiers, alarms, dash cameras and accessories.",
+              image: heroAudio,
+              link: "/audio",
+              color: "bg-accent",
+              icon: Music,
+            },
+          ].map((cat, i) => (
             <motion.div
               key={cat.title}
               initial={{ opacity: 0, y: 30 }}
@@ -101,15 +130,27 @@ export default function Index() {
               transition={{ delay: i * 0.15 }}
             >
               <Link to={cat.link} className="group block">
-                <div className="rounded-xl border bg-card p-8 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <div className={`inline-flex rounded-lg p-3 ${cat.color} text-white mb-4`}>
-                    <cat.icon className="h-8 w-8" />
+                <div className="rounded-xl border bg-card overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={cat.image}
+                      alt={cat.title}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
+                    />
                   </div>
-                  <h3 className="text-2xl font-heading font-bold">{cat.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{cat.description}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-primary font-medium group-hover:gap-2 transition-all">
-                    Explore <ArrowRight className="h-4 w-4" />
-                  </span>
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`inline-flex rounded-lg p-2 ${cat.color} text-primary-foreground`}>
+                        <cat.icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="text-2xl font-heading font-bold">{cat.title}</h3>
+                    </div>
+                    <p className="text-muted-foreground">{cat.description}</p>
+                    <span className="mt-4 inline-flex items-center gap-1 text-primary font-medium group-hover:gap-2 transition-all">
+                      Explore <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             </motion.div>
@@ -117,7 +158,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Why Choose Us */}
+      {/* Brands We Serve */}
       <section className="bg-muted py-20">
         <div className="container">
           <motion.div
@@ -126,28 +167,82 @@ export default function Index() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-heading font-bold">Why Choose Scanlab?</h2>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold">Brands We Serve</h2>
+            <p className="mt-3 text-muted-foreground">Trusted names in trucking and audio</p>
           </motion.div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
-              >
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <f.icon className="h-7 w-7" />
-                </div>
-                <h3 className="font-heading font-semibold text-lg">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{f.description}</p>
-              </motion.div>
-            ))}
+
+          <div className="mb-10">
+            <h3 className="text-lg font-heading font-semibold mb-4 text-center text-muted-foreground">Truck & Trailer Brands</h3>
+            <div className="flex flex-wrap justify-center gap-4">
+              {truckBrands.map((brand, i) => (
+                <motion.div
+                  key={brand.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-2 rounded-lg bg-card px-5 py-3 text-sm font-medium border shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
+                >
+                  <brand.icon className="h-4 w-4 text-primary" />
+                  {brand.name}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-heading font-semibold mb-4 text-center text-muted-foreground">Audio Brands</h3>
+            <div className="flex flex-wrap justify-center gap-4">
+              {audioBrands.map((brand, i) => (
+                <motion.div
+                  key={brand.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="flex items-center gap-2 rounded-lg bg-card px-5 py-3 text-sm font-medium border shadow-sm hover:shadow-md hover:border-accent/30 transition-all"
+                >
+                  <brand.icon className="h-4 w-4 text-accent" />
+                  {brand.name}
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Why Choose Us */}
+      <section className="container py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-heading font-bold">Why Choose ScanLab?</h2>
+        </motion.div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {features.map((f, i) => (
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="text-center"
+            >
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <f.icon className="h-7 w-7" />
+              </div>
+              <h3 className="font-heading font-semibold text-lg">{f.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{f.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Facebook Posts */}
+      <FacebookPosts />
 
       {/* CTA */}
       <section className="container py-20 text-center">
@@ -157,7 +252,7 @@ export default function Index() {
           viewport={{ once: true }}
           className="rounded-2xl bg-primary p-12 text-primary-foreground"
         >
-          <h2 className="text-3xl md:text-4xl font-heading font-bold">Ready to Order?</h2>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold">Need Motor Spares?</h2>
           <p className="mt-3 text-primary-foreground/80 max-w-md mx-auto">
             Get in touch with us today for competitive prices and expert advice on all your motor spares needs.
           </p>

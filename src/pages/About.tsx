@@ -1,10 +1,27 @@
 import { motion } from "framer-motion";
-import { MapPin, Truck, Music, Shield, Users } from "lucide-react";
+import { MapPin, Truck, Music, Shield, Users, Headphones, Settings, Wrench } from "lucide-react";
 import Layout from "@/components/Layout";
 
-const brands = [
-  "International", "Freightliner", "Volvo", "Scania", "Howo",
-  "MAN", "DAF", "Isuzu", "Mitsubishi", "Toyota",
+const truckBrands = [
+  { name: "International", icon: Truck },
+  { name: "Freightliner", icon: Truck },
+  { name: "Volvo", icon: Truck },
+  { name: "Scania", icon: Truck },
+  { name: "Howo", icon: Truck },
+  { name: "MAN", icon: Truck },
+  { name: "DAF", icon: Truck },
+  { name: "Isuzu", icon: Truck },
+  { name: "Mitsubishi", icon: Settings },
+  { name: "Toyota", icon: Wrench },
+];
+
+const audioBrands = [
+  { name: "Pioneer", icon: Headphones },
+  { name: "JBL", icon: Music },
+  { name: "Kenwood", icon: Headphones },
+  { name: "Sony", icon: Music },
+  { name: "Alpine", icon: Headphones },
+  { name: "Blaupunkt", icon: Music },
 ];
 
 export default function About() {
@@ -12,7 +29,7 @@ export default function About() {
     <Layout>
       <section className="bg-nav text-nav-foreground py-16">
         <div className="container">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold">About Scanlab Motor Spares</h1>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold">About ScanLab Motor Spares</h1>
           <p className="mt-2 text-muted-foreground">Proudly Zambian. Passionately driven.</p>
         </div>
       </section>
@@ -26,7 +43,7 @@ export default function About() {
           >
             <h2 className="text-2xl font-heading font-bold mb-4">Our Story</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Scanlab Motor Spares is a proudly Zambian-owned company specializing in truck and trailer spare parts 
+              ScanLab Motor Spares is a proudly Zambian-owned company specializing in truck and trailer spare parts 
               as well as premium car audio and accessories. Located on Kalambo Road in Lusaka's Light Industrial Area, 
               we serve the transport industry with genuine, high-quality products sourced from trusted manufacturers worldwide.
             </p>
@@ -63,10 +80,23 @@ export default function About() {
       <section className="bg-muted py-16">
         <div className="container text-center">
           <h2 className="text-2xl font-heading font-bold mb-8">Brands We Serve</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            {brands.map((brand) => (
-              <span key={brand} className="rounded-full bg-card px-5 py-2 text-sm font-medium border shadow-sm">
-                {brand}
+          
+          <h3 className="text-lg font-heading font-semibold mb-4 text-muted-foreground">Truck & Trailer</h3>
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {truckBrands.map((brand) => (
+              <span key={brand.name} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
+                <brand.icon className="h-4 w-4 text-primary" />
+                {brand.name}
+              </span>
+            ))}
+          </div>
+
+          <h3 className="text-lg font-heading font-semibold mb-4 text-muted-foreground">Audio & Accessories</h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            {audioBrands.map((brand) => (
+              <span key={brand.name} className="flex items-center gap-2 rounded-lg bg-card px-5 py-2.5 text-sm font-medium border shadow-sm">
+                <brand.icon className="h-4 w-4 text-accent" />
+                {brand.name}
               </span>
             ))}
           </div>
@@ -83,7 +113,7 @@ export default function About() {
         </div>
         <div className="rounded-xl overflow-hidden shadow-lg">
           <iframe
-            title="Scanlab Location"
+            title="ScanLab Location"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3846.5!2d28.28!3d-15.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTXCsDI1JzEyLjAiUyAyOMKwMTYnNDguMCJF!5e0!3m2!1sen!2szm!4v1"
             width="100%"
             height="400"
