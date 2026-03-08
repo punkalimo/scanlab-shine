@@ -85,7 +85,7 @@ export default function Spares() {
               <Card
                 key={product.id}
                 className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer relative"
-                onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url })}
+                onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url, description: product.description, price: product.price, category: product.category })}
               >
                 {/* Compare checkbox */}
                 <div
