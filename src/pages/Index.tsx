@@ -198,7 +198,7 @@ export default function Index() {
 
           <div className="mb-10">
             <h3 className="text-lg font-heading font-semibold mb-4 text-center text-muted-foreground">Truck & Trailer Brands</h3>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-6">
               {truckBrands.map((brand, i) => (
                 <motion.div
                   key={brand.name}
@@ -206,10 +206,10 @@ export default function Index() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-2 rounded-lg bg-card px-5 py-3 text-sm font-medium border shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
+                  className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 w-28 border shadow-sm hover:shadow-md hover:border-primary/30 transition-all"
                 >
-                  <brand.icon className="h-4 w-4 text-primary" />
-                  {brand.name}
+                  <img src={brand.logo} alt={brand.name} className="h-12 w-12 object-contain" />
+                  <span className="text-xs font-medium text-foreground">{brand.name}</span>
                 </motion.div>
               ))}
             </div>
@@ -217,7 +217,7 @@ export default function Index() {
 
           <div>
             <h3 className="text-lg font-heading font-semibold mb-4 text-center text-muted-foreground">Audio Brands</h3>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-6">
               {audioBrands.map((brand, i) => (
                 <motion.div
                   key={brand.name}
@@ -225,10 +225,10 @@ export default function Index() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-2 rounded-lg bg-card px-5 py-3 text-sm font-medium border shadow-sm hover:shadow-md hover:border-accent/30 transition-all"
+                  className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 w-28 border shadow-sm hover:shadow-md hover:border-accent/30 transition-all"
                 >
-                  <brand.icon className="h-4 w-4 text-accent" />
-                  {brand.name}
+                  <img src={brand.logo} alt={brand.name} className="h-12 w-12 object-contain" />
+                  <span className="text-xs font-medium text-foreground">{brand.name}</span>
                 </motion.div>
               ))}
             </div>
