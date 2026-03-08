@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { toast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useCmsData";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -22,10 +23,18 @@ type ContactForm = z.infer<typeof contactSchema>;
 
 export default function Contact() {
   const [submitting, setSubmitting] = useState(false);
+  const { data: settings = {} } = useSiteSettings();
   const form = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", subject: "", message: "" },
   });
+
+  const phone = settings.phone || "+260 977 760 291";
+  const email = settings.email || "info@scanlabmotors.com";
+  const address = settings.address || "1563 Kalambo Road, Light Industrial Area, Lusaka, Zambia";
+  const whatsapp = settings.whatsapp || "+260977760291";
+  const facebookUrl = settings.facebook_url || "https://facebook.com";
+  const workingHours = settings.working_hours || "Mon–Fri: 8:00 AM – 5:00 PM | Sat: 8:00 AM – 1:00 PM | Sun: Closed";
 
   const onSubmit = async (values: ContactForm) => {
     setSubmitting(true);
@@ -104,35 +113,35 @@ export default function Contact() {
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">Address</h3>
-                  <p className="text-sm text-muted-foreground">1563 Kalambo Road, Light Industrial Area, Lusaka, Zambia</p>
+                  <p className="text-sm text-muted-foreground">{address}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 rounded-lg border p-4">
                 <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">Phone</h3>
-                  <p className="text-sm text-muted-foreground">+260 977 760 291</p>
+                  <p className="text-sm text-muted-foreground">{phone}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 rounded-lg border p-4">
                 <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">Email</h3>
-                  <p className="text-sm text-muted-foreground">info@scanlabmotors.com</p>
+                  <p className="text-sm text-muted-foreground">{email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 rounded-lg border p-4">
                 <MessageCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">WhatsApp</h3>
-                  <a href="https://wa.me/+260977760291" className="text-sm text-primary hover:underline">Chat with us on WhatsApp</a>
+                  <a href={`https://wa.me/${whatsapp.replace(/\s/g, "")}`} className="text-sm text-primary hover:underline">Chat with us on WhatsApp</a>
                 </div>
               </div>
               <div className="flex items-start gap-4 rounded-lg border p-4">
                 <Facebook className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-sm">Facebook</h3>
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Follow us on Facebook</a>
+                  <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Follow us on Facebook</a>
                 </div>
               </div>
             </div>
@@ -140,9 +149,9 @@ export default function Contact() {
             <div className="rounded-lg bg-muted p-6">
               <h3 className="font-heading font-semibold mb-2">Business Hours</h3>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Monday – Friday: 8:00 AM – 5:00 PM</p>
-                <p>Saturday: 8:00 AM – 1:00 PM</p>
-                <p>Sunday: Closed</p>
+                {workingHours.split("|").map((line, i) => (
+                  <p key={i}>{line.trim()}</p>
+                ))}
               </div>
             </div>
           </div>
