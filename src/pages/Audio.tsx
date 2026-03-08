@@ -1,19 +1,25 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Package } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Search, Package, GitCompareArrows } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import Layout from "@/components/Layout";
 import ProductGallery from "@/components/ProductGallery";
+import ProductCompare from "@/components/ProductCompare";
+import WhatsAppEnquire from "@/components/WhatsAppEnquire";
 import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["All", "Speakers", "Subwoofers", "Amplifiers", "Head Units", "Alarms", "Dash Cams", "Accessories"];
 
 export default function Audio() {
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [category, setCategory] = useState("All");
   const [galleryProduct, setGalleryProduct] = useState<{ id: string; name: string; image_url: string | null } | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "audio"],
@@ -33,6 +39,12 @@ export default function Audio() {
     const matchCat = category === "All" || p.category === category;
     return matchSearch && matchCat;
   });
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : prev.length < 4 ? [...prev, id] : prev
+    );
+  };
 
   return (
     <Layout>
@@ -74,9 +86,23 @@ export default function Audio() {
             {filtered.map((product) => (
               <Card
                 key={product.id}
-                className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                className="group overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer relative"
                 onClick={() => setGalleryProduct({ id: product.id, name: product.name, image_url: product.image_url })}
               >
+                {/* Compare checkbox */}
+                <div
+                  className="absolute top-3 right-3 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <label className="flex items-center gap-1.5 bg-card/90 backdrop-blur rounded-md px-2 py-1 border border-border cursor-pointer">
+                    <Checkbox
+                      checked={compareIds.includes(product.id)}
+                      onCheckedChange={() => toggleCompare(product.id)}
+                    />
+                    <GitCompareArrows className="w-3 h-3 text-muted-foreground" />
+                  </label>
+                </div>
+
                 <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
@@ -88,7 +114,10 @@ export default function Audio() {
                   <span className="text-xs font-medium uppercase tracking-wider text-accent">{product.category}</span>
                   <h3 className="mt-1 font-heading font-semibold text-foreground line-clamp-2">{product.name}</h3>
                   {product.description && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{product.description}</p>}
-                  {product.price && <p className="mt-2 font-heading font-bold text-primary">K{product.price.toLocaleString()}</p>}
+                  <div className="mt-3 flex items-center justify-between">
+                    {product.price && <p className="font-heading font-bold text-primary">K{product.price.toLocaleString()}</p>}
+                    <WhatsAppEnquire productName={product.name} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -105,6 +134,13 @@ export default function Audio() {
           onOpenChange={(open) => !open && setGalleryProduct(null)}
         />
       )}
+
+      <ProductCompare
+        products={products}
+        selectedIds={compareIds}
+        onToggle={toggleCompare}
+        onClear={() => setCompareIds([])}
+      />
     </Layout>
   );
 }
