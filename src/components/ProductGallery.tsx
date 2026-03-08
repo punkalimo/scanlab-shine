@@ -105,9 +105,18 @@ export default function ProductGallery({
           </div>
         )}
 
-        {/* Product name */}
-        <div className="px-4 pb-4">
-          <p className="font-heading font-semibold text-foreground">{productName}</p>
+        {/* Product info */}
+        <div className="px-4 pb-4 space-y-2">
+          {productCategory && (
+            <span className="text-xs font-medium uppercase tracking-wider text-primary">{productCategory}</span>
+          )}
+          <p className="font-heading font-semibold text-lg text-foreground">{productName}</p>
+          {productPrice && (
+            <p className="font-heading font-bold text-primary text-xl">K{productPrice.toLocaleString()}</p>
+          )}
+          {productDescription && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{productDescription}</p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

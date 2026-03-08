@@ -128,6 +128,9 @@ export default function Spares() {
           productId={galleryProduct.id}
           mainImageUrl={galleryProduct.image_url}
           productName={galleryProduct.name}
+          productDescription={galleryProduct.description}
+          productPrice={galleryProduct.price}
+          productCategory={galleryProduct.category}
           open={!!galleryProduct}
           onOpenChange={(open) => !open && setGalleryProduct(null)}
         />
