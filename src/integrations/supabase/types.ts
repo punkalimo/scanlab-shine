@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      content_pages: {
+        Row: {
+          content: Json
+          id: string
+          page_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          page_key: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          id?: string
+          page_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           created_at: string
@@ -109,6 +133,27 @@ export type Database = {
           price?: number | null
           product_type?: Database["public"]["Enums"]["product_type"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
