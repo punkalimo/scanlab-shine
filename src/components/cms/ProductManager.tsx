@@ -53,6 +53,7 @@ export default function ProductManager() {
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("");
   const [csvImporting, setCsvImporting] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
