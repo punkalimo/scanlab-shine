@@ -6,7 +6,7 @@ import { Facebook } from "lucide-react";
  * Uses the Facebook Page Plugin (iframe) — no API key required.
  * Replace the `href` value below with the actual Facebook Page URL.
  */
-const FACEBOOK_PAGE_URL = "https://www.facebook.com/ScanLabMotorSpares"; // ← update with real URL
+const FACEBOOK_PAGE_URL = "https://www.facebook.com/profile.php?id=100063526975628";
 
 export default function FacebookPosts() {
   return (
